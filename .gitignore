@@ -1,0 +1,12 @@
+# Local screenshots and notes — not published to the repo
+_screenshots/
+_notes/
+
+# Windows cruft
+Thumbs.db
+Desktop.ini
+
+# Editor temp files
+*.swp
+*~
+.vscode/
