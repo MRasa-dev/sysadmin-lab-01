@@ -57,4 +57,4 @@ A single Rocky Linux 9.7 server VM running on VMware Workstation Pro, hardened a
 
 ## Log
 
-- **2026-04-19** — Initial Rocky 9.7 install. SSH hardening applied and verified. Lab foundation in place.
+- **2026-04-19** — Initial Rocky Linux 9.7 install on VMware Workstation Pro. Baseline hardening: key-based SSH auth deployed (Ed25519), password and root login disabled via `sshd_config`, config validated with `sshd -t` before restart, hardening verified by attempting password-only connection. `open-vm-tools` installed for guest integration. `firewalld` default state documented. Repo initialised; `.gitignore` configured to keep local screenshots and notes out of version control.
