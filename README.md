@@ -42,6 +42,18 @@ A single Rocky Linux 9.7 server VM running on VMware Workstation Pro, hardened a
 - No manual port rules or rich rules yet
 - Future work: remove `cockpit` from allowed services; tighten SSH access to specific source IPs
 
+### fail2ban (SSH brute-force protection)
+
+- Installed: `fail2ban` from EPEL repository
+- Configuration: `/etc/fail2ban/jail.local`
+  - Ban duration: 1 hour (3600 seconds)
+  - Detection window: 10 minutes (600 seconds)
+  - Ban threshold: 5 failed attempts
+  - Monitored: SSH (port 22)
+- Service enabled and started: `systemctl enable fail2ban` and `systemctl start fail2ban`
+- Status verified: `sudo fail2ban-client status sshd` shows 0 currently banned IPs
+- Hardening verified by attempting multiple failed SSH logins; failed attempts logged and monitored
+
 ## Planned next phases
 
 1. **Centralised logging.** Deploy a log aggregator (Wazuh SIEM or a minimal Elastic stack) on the VM, configure local agent, generate events and observe them landing in a dashboard. Goal: build the muscle for SIEM investigation in a small, safe environment.
