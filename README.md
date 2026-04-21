@@ -70,3 +70,4 @@ A single Rocky Linux 9.7 server VM running on VMware Workstation Pro, hardened a
 ## Log
 
 - **2026-04-19** — Initial Rocky Linux 9.7 install on VMware Workstation Pro. Baseline hardening: key-based SSH auth deployed (Ed25519), password and root login disabled via `sshd_config`, config validated with `sshd -t` before restart, hardening verified by attempting password-only connection. `open-vm-tools` installed for guest integration. `firewalld` default state documented. Repo initialised; `.gitignore` configured to keep local screenshots and notes out of version control.
+- **2026-04-21** — Added fail2ban for SSH brute-force protection. Installed fail2ban from EPEL repository, configured sshd jail with 1-hour ban duration and 5-attempt threshold. Service enabled and verified with `fail2ban-client status`. This hardens against dictionary and brute-force attacks on SSH before proceeding to Phase 2.
