@@ -1,6 +1,6 @@
 # SysAdmin Lab
 
-A personal systems administration and security monitoring lab, documenting the build of a Linux and Windows infrastructure environment. The lab is maintained alongside active study for CCNA (July 2026), and as a hands-on complement to my work as a Technical Analyst at the Australian Signals Directorate.
+A personal systems administration and security monitoring lab, documenting the build of a Linux and Windows infrastructure environment. The lab is maintained alongside active study for CCNA (July 2026), and as a hands-on complement to my work as a Technical Analyst.
 
 ## Goals
 
