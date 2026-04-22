@@ -10,7 +10,7 @@ A personal systems administration and security monitoring lab, documenting the b
 
 ## Current state
 
-A single Rocky Linux 9.7 server VM running on VMware Workstation Pro, hardened as the foundation for further work.
+Phase 1 complete. Phase 2 in progress: Rocky Linux 9.7 server hardened and running; Windows Server 2022 VM created and installed, awaiting promotion to Domain Controller.
 
 ### Host environment
 
@@ -18,15 +18,23 @@ A single Rocky Linux 9.7 server VM running on VMware Workstation Pro, hardened a
 - VMware Workstation Pro (personal-use licence)
 - Git Bash for terminal work and Git operations
 
-### Guest (VM) configuration
+### Guest VMs
 
-- Rocky Linux 9.7 (Blue Onyx), Server profile (no desktop)
+#### Rocky Linux 9.7 (`rocky-lab-01`)
+- Server profile (no desktop)
 - 4 GB RAM, 2 vCPU, 40 GB disk
 - NAT networking (192.168.126.0/24), private to host
 - Hostname: `rocky-lab-01`
+- IP: 192.168.126.130
 - Non-privileged administrative user with `wheel` group membership for `sudo`
 
-### Hardening applied
+#### Windows Server 2022 (`win-dc-01`)
+- Standard Evaluation with Desktop Experience
+- 4 GB RAM, 2 vCPU, 60 GB disk
+- NAT networking (192.168.126.0/24), private to host
+- Status: Clean installation complete, awaiting AD DS promotion
+
+### Hardening applied (Rocky Linux)
 
 - Full system update via `dnf update` immediately after install
 - `open-vm-tools` installed for guest integration
@@ -54,12 +62,31 @@ A single Rocky Linux 9.7 server VM running on VMware Workstation Pro, hardened a
 - Status verified: `sudo fail2ban-client status sshd` shows 0 currently banned IPs
 - Hardening verified by attempting multiple failed SSH logins; failed attempts logged and monitored
 
+## Phase 2 progress
+
+### Windows Server 2022 Domain Controller (`win-dc-01`)
+
+- **VM specification:** 4 GB RAM, 2 vCPU, 60 GB disk, NAT networking (192.168.126.0/24)
+- **OS:** Windows Server 2022 Standard Evaluation with Desktop Experience
+- **Status:** Clean installation complete, awaiting AD DS promotion
+- **Snapshot taken:** `post-install-clean` (checkpoint before DC configuration)
+- **Next steps:** Install AD DS and DNS roles, create domain and OU structure, configure Group Policy and Windows Event Forwarding
+
+### Integration plan
+
+- Configure DNS on `win-dc-01` to resolve `rocky-lab-01.local`
+- Join `rocky-lab-01` to the domain using SSSD or `realmd`
+- Test cross-platform authentication (Linux client authenticating to Windows AD)
+
 ## Planned next phases
 
-1. **Centralised logging.** Deploy a log aggregator (Wazuh SIEM or a minimal Elastic stack) on the VM, configure local agent, generate events and observe them landing in a dashboard. Goal: build the muscle for SIEM investigation in a small, safe environment.
-2. **Windows Server domain controller.** Add a Windows Server 2022 VM, configure Active Directory Domain Services, DNS, Group Policy, and Windows Event Forwarding to the log aggregator.
-3. **Configuration automation.** Introduce Ansible or PowerShell DSC for repeatable configuration of both hosts. Retrofit the hardening steps from phase one into automated playbooks.
-4. **Detection engineering.** Tune MITRE ATT&CK-aligned detection rules against simulated adversarial activity (Atomic Red Team).
+1. **Windows Server domain controller (Phase 2 — in progress).** Promote `win-dc-01` to Active Directory Domain Controller, install DNS, configure Group Policy, and Windows Event Forwarding. Join `rocky-lab-01` to the domain for cross-platform authentication and centralised management.
+
+2. **Centralised logging with Wazuh SIEM (Phase 3).** Deploy Wazuh on a dedicated VM or upgrade `rocky-lab-01` resources. Configure Windows Event Forwarding from the DC and local agent on Rocky to feed into centralised SIEM. Goal: aggregate, visualise, and alert on events from both Linux and Windows.
+
+3. **Configuration automation with Ansible (Phase 4).** Introduce Ansible for repeatable, idempotent configuration of both hosts. Retrofit Phase 1 hardening steps into playbooks. Explore PowerShell DSC for Windows automation if appropriate.
+
+4. **Detection engineering (Phase 5).** Tune MITRE ATT&CK-aligned detection rules in Wazuh. Simulate adversarial activity using Atomic Red Team and refine detection logic based on observed events.
 
 ## Key learnings so far
 
@@ -71,4 +98,4 @@ A single Rocky Linux 9.7 server VM running on VMware Workstation Pro, hardened a
 
 - **2026-04-19** — Initial Rocky Linux 9.7 install on VMware Workstation Pro. Baseline hardening: key-based SSH auth deployed (Ed25519), password and root login disabled via `sshd_config`, config validated with `sshd -t` before restart, hardening verified by attempting password-only connection. `open-vm-tools` installed for guest integration. `firewalld` default state documented. Repo initialised; `.gitignore` configured to keep local screenshots and notes out of version control.
 - **2026-04-21** — Added fail2ban for SSH brute-force protection. Installed fail2ban from EPEL repository, configured sshd jail with 1-hour ban duration and 5-attempt threshold. Service enabled and verified with `fail2ban-client status`. This hardens against dictionary and brute-force attacks on SSH before proceeding to Phase 2.
-- **2026-04-21** — Phase 2 kickoff: Created Windows Server 2022 VM (`win-dc-01`, 4 GB RAM, 2 vCPU, 60 GB disk, NAT networking). Downloaded Windows Server 2022 Standard Evaluation ISO and performed clean installation with Desktop Experience. VM successfully booting to login screen. Next: promote to Domain Controller with AD DS and DNS roles.
+- **2026-04-21** — Phase 2 kickoff: Created Windows Server 2022 VM (`win-dc-01`, 4 GB RAM, 2 vCPU, 60 GB disk, NAT networking). Downloaded Windows Server 2022 Standard Evaluation ISO, performed clean installation with Desktop Experience, and verified successful boot to login screen. Took clean snapshot (`post-install-clean`) as checkpoint before AD DS configuration. Next: promote to Domain Controller, configure DNS and Group Policy, then integrate `rocky-lab-01` into the domain.
