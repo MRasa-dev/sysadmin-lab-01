@@ -1,6 +1,6 @@
 # SysAdmin Lab
 
-A personal systems administration and security monitoring lab, documenting the build of an enterprise-grade Linux and Windows infrastructure environment. The lab is maintained alongside active study for **RHCSA certification** (RHEL 10, late July 2026), and as a hands-on complement to my work as a Technical Analyst.
+A personal systems administration and security monitoring lab, documenting the build of an enterprise-grade Linux and Windows infrastructure environment. The lab is maintained alongside active study for **RHCSA certification** (RHEL 10, August 2026), and as a hands-on complement to my work as a Technical Analyst.
 
 ## Goals
 
