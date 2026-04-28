@@ -1,6 +1,6 @@
 # SysAdmin Lab
 
-A personal systems administration and security monitoring lab, documenting the build of an enterprise-grade Linux and Windows infrastructure environment. The lab is maintained alongside active study for **RHCSA certification** (RHEL 10, August 2026), and as a hands-on complement to my work as a Technical Analyst.
+A personal systems administration and security monitoring lab, documenting the build of an enterprise-grade Linux and Windows infrastructure environment. The lab is maintained alongside active study for **RHCSA certification** (RHEL 10, late July 2026), and as a hands-on complement to my work as a Technical Analyst.
 
 ## Goals
 
@@ -19,7 +19,7 @@ A personal systems administration and security monitoring lab, documenting the b
 
 ## Current state
 
-Phase 1 complete. Phase 2 in progress: Rocky Linux 9.7 server hardened and running; Windows Server 2022 VM created and installed, awaiting promotion to Domain Controller.
+Phase 1 complete. Phase 2 complete. Rocky Linux 9.7 server hardened and running; Windows Server 2022 promoted to Domain Controller with Active Directory configured.
 
 ### Host environment
 
@@ -42,8 +42,8 @@ Phase 1 complete. Phase 2 in progress: Rocky Linux 9.7 server hardened and runni
 - Standard Evaluation with Desktop Experience
 - 4 GB RAM, 2 vCPU, 60 GB disk
 - NAT networking (192.168.126.0/24), private to host
-- Status: Clean installation complete, awaiting AD DS promotion
-- Snapshot: `post-install-clean`
+- **Status: Active Directory Domain Controller for `lab.local` domain**
+- Snapshots: `post-install-clean`, `phase2-02-ad-configured-with-ous-and-users`
 
 ### Hardening applied (Rocky Linux)
 
@@ -73,21 +73,34 @@ Phase 1 complete. Phase 2 in progress: Rocky Linux 9.7 server hardened and runni
 - Status verified: `sudo fail2ban-client status sshd` shows 0 currently banned IPs
 - Hardening verified by attempting multiple failed SSH logins; failed attempts logged and monitored
 
-## Phase 2 progress
+## Phase 2 progress — COMPLETE ✅
 
 ### Windows Server 2022 Domain Controller (`win-dc-01`)
 
-- **VM specification:** 4 GB RAM, 2 vCPU, 60 GB disk, NAT networking (192.168.126.0/24)
-- **OS:** Windows Server 2022 Standard Evaluation with Desktop Experience
-- **Status:** Clean installation complete, awaiting AD DS promotion
-- **Snapshot taken:** `post-install-clean` (checkpoint before DC configuration)
-- **Next steps:** Install AD DS and DNS roles, create domain and OU structure, configure Group Policy and Windows Event Forwarding
+**Configuration completed:**
+- Active Directory Domain Services (AD DS) installed and promoted to Domain Controller
+- Domain created: `lab.local` (Forest: Windows Server 2016 functional level)
+- DNS Server installed and configured
+- Active Directory Users and Computers configured
 
-### Integration plan
+**Organizational Units (OUs) created:**
+- `IT-Users` — for domain user accounts
+- `IT-Computers` — for joined computers
+- `IT-Service-Accounts` — for service accounts
 
-- Configure DNS on `win-dc-01` to resolve `rocky-lab-01.local`
-- Join `rocky-lab-01` to the domain using SSSD or `realmd`
-- Test cross-platform authentication (Linux client authenticating to Windows AD)
+**Test domain users created:**
+- `testuser` (in IT-Users OU)
+- `labadmin` (in IT-Users OU)
+
+**Snapshots taken:**
+- `post-install-clean` (after Windows Server installation)
+- `phase2-02-ad-configured-with-ous-and-users` (after DC promotion and OU/user configuration)
+
+### Next steps
+
+- Join `rocky-lab-01` to the domain using SSSD/realmd (RHCSA exam objective)
+- Configure Group Policy on the DC
+- Set up Windows Event Forwarding for centralized logging
 
 ## Lab roadmap (9 phases)
 
@@ -97,13 +110,13 @@ Phase 1 complete. Phase 2 in progress: Rocky Linux 9.7 server hardened and runni
 - Base OS hardening: SSH key-based auth, firewall configuration, fail2ban
 - Foundation for all subsequent work
 
-**Phase 2: Windows Server domain controller** (in progress)
-- Promote `win-dc-01` to Active Directory Domain Controller
-- Install DNS, configure Group Policy, and Windows Event Forwarding
-- Join `rocky-lab-01` to the domain for cross-platform authentication and centralised management
-- Estimated: 1–2 weeks
+**Phase 2: Windows Server domain controller** ✅ COMPLETE
+- Domain Controller promotion: `lab.local` domain created
+- Active Directory configured with OUs and test users
+- DNS Server installed and operational
+- Next: Join Rocky Linux to domain, configure Group Policy, set up Event Forwarding
 
-**Phase 3: Centralised logging with Wazuh SIEM**
+**Phase 3: Centralised logging with Wazuh SIEM** (next)
 - Deploy Wazuh on dedicated VM or upgrade `rocky-lab-01` resources
 - Configure Windows Event Forwarding from the DC and local agent on Rocky
 - Aggregate, visualise, and alert on events from both Linux and Windows
@@ -153,8 +166,8 @@ Phase 1 complete. Phase 2 in progress: Rocky Linux 9.7 server hardened and runni
 
 ### Total estimated timeline
 
-- **Phases 1–5 (traditional infrastructure):** ~12–14 weeks (complete by early June 2026)
-- **RHCSA exam prep and study:** June–August 2026
+- **Phases 1–5 (traditional infrastructure):** ~14–16 weeks (Phase 2 complete; Phase 3–5 ongoing)
+- **RHCSA exam prep and study:** June–late July 2026
 - **Phases 6–9 (DevOps/cloud):** Post-RHCSA, August 2026 onwards
 
 ## RHCSA certification alignment
@@ -164,10 +177,21 @@ Every phase of this lab directly supports RHCSA exam preparation:
 | Phase | RHCSA alignment |
 |-------|-----------------|
 | Phase 1 | SSH hardening, firewall (`firewalld`), fail2ban, systemd services |
-| Phase 2 | Domain integration with SSSD/realmd, user/group authentication |
+| Phase 2 | Domain integration with SSSD/realmd, user/group authentication, AD basics |
 | Phase 3 | Log management and analysis |
 | Phase 4 | Configuration management concepts |
 | Phase 5 | Security monitoring and incident response |
+
+**Study resources:**
+- van Vugt's RHCSA RHEL 10 Study Guide (with 60% discount code: SANDER60)
+- Red Hat Free Developer Subscription (RHEL 10 media and documentation)
+- Lab environment (hands-on practice of exam objectives)
+- Official exam objectives (download from Red Hat)
+
+**Exam details:**
+- Exam: RHCSA EX200 (RHEL 10)
+- Format: Performance-based, 120 minutes
+- Target date: late July 2026
 
 ## Key learnings so far
 
@@ -175,9 +199,12 @@ Every phase of this lab directly supports RHCSA exam preparation:
 - The ordering discipline for SSH hardening matters: deploy and test the new authentication method *before* disabling the old one, and always validate config with `sshd -t` before restarting the daemon.
 - `firewalld`'s service-based model (e.g. `services: ssh`) is easier to reason about and safer than raw port numbers; using named services is a small but real defence against misconfiguration.
 - Rocky Linux is the correct choice for enterprise infrastructure study: 1:1 binary compatible with RHEL, giving credibility for both RHCSA exam prep and future enterprise roles.
+- Active Directory promotion workflow: understand the distinction between forest/domain/OUs. Creating a new forest with a single domain is appropriate for lab/test environments.
+- Group Policy and centralized user management are foundational to enterprise infrastructure. Test OUs and users should be created early to support future lab phases (SIEM, automation, detection).
 
 ## Log
 
 - **2026-04-19** — Initial Rocky Linux 9.7 install on VMware Workstation Pro. Baseline hardening: key-based SSH auth deployed (Ed25519), password and root login disabled via `sshd_config`, config validated with `sshd -t` before restart, hardening verified by attempting password-only connection. `open-vm-tools` installed for guest integration. `firewalld` default state documented. Repo initialised; `.gitignore` configured to keep local screenshots and notes out of version control.
 - **2026-04-21** — Added fail2ban for SSH brute-force protection. Installed fail2ban from EPEL repository, configured sshd jail with 1-hour ban duration and 5-attempt threshold. Service enabled and verified with `fail2ban-client status`. This hardens against dictionary and brute-force attacks on SSH before proceeding to Phase 2.
 - **2026-04-21** — Phase 2 kickoff: Created Windows Server 2022 VM (`win-dc-01`, 4 GB RAM, 2 vCPU, 60 GB disk, NAT networking). Downloaded Windows Server 2022 Standard Evaluation ISO, performed clean installation with Desktop Experience, and verified successful boot to login screen. Took clean snapshot (`post-install-clean`) as checkpoint before AD DS configuration. Next: promote to Domain Controller, configure DNS and Group Policy, then integrate `rocky-lab-01` into the domain.
+- **2026-04-28** — Phase 2 completion: Promoted `win-dc-01` to Active Directory Domain Controller for `lab.local` domain. Installed AD DS and DNS roles; configured forest (Windows Server 2016 functional level) and domain. Created Organizational Units (IT-Users, IT-Computers, IT-Service-Accounts) for structured AD management. Created test domain users (`testuser`, `labadmin`) in IT-Users OU. Took snapshot (`phase2-02-ad-configured-with-ous-and-users`) as checkpoint. Next: join `rocky-lab-01` to domain using SSSD/realmd, configure Group Policy, set up Windows Event Forwarding.
